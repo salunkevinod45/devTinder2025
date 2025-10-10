@@ -5,7 +5,7 @@ const app = express();
 
 
 app.use("/hello", (req, res) => {
-  res.send("Hello world test");
+  res.send("Hello world test demo");
 });
 
 app.use("/test",(req,res)=>{

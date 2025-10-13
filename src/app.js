@@ -27,9 +27,14 @@ app.get(/^.*salunke$/,(req,res)=>{
 })
 
 app.get(/^\/vinod(.*)$/,(req,res)=>{
-  console.log(req.params);
  res.send('site details with query parameters')
 })
+
+app.get('/sitesdemo',(req,res)=>{
+  console.log(req.query);
+ res.send('site details with query parameters')
+})
+
 
 app.get('/sites/:siteId/:name',(req,res)=>{
   console.log(req.params);

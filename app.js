@@ -6,7 +6,7 @@ const { adminAuth, userAuth } = require("./middlewares/auth");
 const connectDB = require("./config/database");
 const User = require("./models/user");
 
-const { validateSignupData } = require("./utils/validation");
+const { validateSignupData, validateLoginData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 
 app.use(express.json());
@@ -174,6 +174,26 @@ app.patch("/userByEmail/:userEmail", async (req, res) => {
     return res
       .status(404)
       .send("Error updating user by email : " + error.message);
+  }
+});
+
+// login api 
+app.post("/login", async (req, res) => {
+  try {
+    // code for validate login data
+    validateLoginData(req);
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+      return res.status(400).send("Invalid credentials");
+    }
+    res.send("User logged in successfully");
+  } catch (error) {
+    return res.status(500).send("Error logging in user : " + error.message);
   }
 });
 

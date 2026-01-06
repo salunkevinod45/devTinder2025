@@ -1,5 +1,6 @@
 const validator = require('validator');
 
+// validate signup data
 const validateSignupData = (req) =>{
     const { firstName,lastName, email } = req.body;
 

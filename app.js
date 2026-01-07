@@ -8,8 +8,11 @@ const User = require("./models/user");
 
 const { validateSignupData, validateLoginData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/user", async (req, res) => {
   try {
@@ -191,10 +194,28 @@ app.post("/login", async (req, res) => {
     if (!isPasswordMatch) {
       return res.status(400).send("Invalid credentials");
     }
+    //create jwt token and send to client
+    const token = jwt.sign({ userId: user._id }, 'secretKey');
+    res.cookie("token", token);
     res.send("User logged in successfully");
   } catch (error) {
     return res.status(500).send("Error logging in user : " + error.message);
   }
+});
+
+app.get("/profile",async (req, res) => {
+  try {
+      const token = req.cookies?.token;
+      const decoded = jwt.verify(token, 'secretKey');
+      const user = await User.findById(decoded.userId);
+      if (!user) {
+          return res.status(404).send("User not found");
+      }
+      res.send(user);
+  } catch (error) {
+    return res.status(500).send("Error fetching profile : " + error.message);
+  }
+
 });
 
 // Connect to the database

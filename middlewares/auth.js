@@ -1,24 +1,28 @@
-const adminAuth = ((req, res, next) => {
-    console.log("Admin auth middleware");
-    const token = "xyz";
-    if(token!=="xyz"){
-        return res.status(403).send("Access denied");
-    }else{
-        next();
-    }
-})
+const jwt = require("jsonwebtoken");
 
-const userAuth = ((req, res, next) => {
-    console.log("User auth middleware");
-    const token = "abc";
-    if(token!=="abc"){
-        return res.status(403).send("Access denied");
-    }else{
-        next();
-    }
-})
+const user = require("../models/user");
 
-module.exports = {
-    adminAuth,
-    userAuth
-}
+const userAuth = async(req, res, next) => {
+  try {
+    console.log("User authentication middleware accessed");
+    const { token } = req.cookies;
+    if (!token) {
+      throw new Error("No token provided");
+    }
+    const decodedToken = jwt.verify(token,'secretKey');
+    const userId = decodedToken.userId;
+    if(!userId) {
+      throw new Error("Invalid token: User ID missing");
+    }
+    const userData = await user.findById(userId);
+    if (!userData) {
+      return res.status(401).send("Unauthorized: User not found");
+    }
+    req.user = userData;
+    next();
+  } catch (error) {
+    return res.status(401).send("Unauthorized: " + error.message);
+  }
+};
+
+module.exports = { userAuth };

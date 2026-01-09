@@ -73,6 +73,21 @@ const userSchema = new Schema({
     }
 },{timestamps: true});
 
+userSchema.methods.setJWT = function() {
+    const user = this;
+    const jwt = require("jsonwebtoken");
+    const token = jwt.sign({ userId: user._id }, 'secretKey', { expiresIn: '1d' });
+    return token;
+}
+
+userSchema.methods.validatePassword = async function(passwordInput) {
+    const user = this;
+    const passwordHash = user.password;
+    const bcrypt = require("bcrypt");
+    const isValidPassword = await bcrypt.compare(passwordInput, passwordHash);
+    return isValidPassword;
+}
+
 const User = model("User", userSchema);
 
 module.exports = User;

@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 
-const { adminAuth, userAuth } = require("./middlewares/auth");
+const { userAuth } = require("./middlewares/auth");
 
 const connectDB = require("./config/database");
 const User = require("./models/user");
@@ -14,46 +14,6 @@ const jwt = require("jsonwebtoken");
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/user", async (req, res) => {
-  try {
-    const user = await User.findOne({ email: req.body.email }).sort({ _id: 1 });
-    if (!user) {
-      return res.status(404).send("User not found");
-    } else {
-      res.send(user);
-    }
-  } catch (error) {
-    return res.status(404).send("Error fetching user : " + error.message);
-  }
-  res.send("User route accessed");
-});
-
-app.get("/feed", async (req, res) => {
-  try {
-    const users = await User.find({}).exec();
-    if (users.length) {
-      return res.status(200).send(users);
-    } else {
-      return res.status(404).send("No users found");
-    }
-  } catch (error) {
-    return res.status(404).send("Error fetching feed : " + error.message);
-  }
-});
-
-app.get("/userById", async (req, res) => {
-  try {
-    const user = await User.findById(req.body.id);
-    if (!user) {
-      return res.status(404).send("User not found");
-    } else {
-      res.send(user);
-    }
-  } catch (error) {
-    return res.status(404).send("Error fetching user by ID : " + error.message);
-  }
-});
-
 app.post("/signup", async (req, res) => {
   // console.log(req.body);
   // Signup logic here
@@ -61,7 +21,16 @@ app.post("/signup", async (req, res) => {
     // code for validate signup data
     validateSignupData(req);
     //encrypt password before saving to database
-    const {firstName,lastName,age,location,gender,email,password,skills} = req.body;
+    const {
+      firstName,
+      lastName,
+      age,
+      location,
+      gender,
+      email,
+      password,
+      skills,
+    } = req.body;
     const passwordHash = await bcrypt.hash(req.body.password, 10);
     const user = new User({
       firstName,
@@ -71,7 +40,7 @@ app.post("/signup", async (req, res) => {
       gender,
       email,
       password: passwordHash,
-      skills
+      skills,
     });
     await user.save();
     res.send("User signed up successfully");
@@ -80,107 +49,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.delete("/user", async (req, res) => {
-  try {
-    const user = await User.findByIdAndDelete(req.body.userId);
-    if (!user) {
-      return res.status(404).send("User not found");
-    } else {
-      res.send("User deleted successfully");
-    }
-  } catch (error) {
-    return res.status(404).send("Error deleting user : " + error.message);
-  }
-});
-
-// api to update user details by user id
-app.patch("/user/:userId", async (req, res) => {
-  try {
-    const userId = req.params?.userId;
-    const allowedUpdates = [
-      "firstName",
-      "lastName",
-      "password",
-      "age",
-      "location",
-      "gender",
-      "photoUrl",
-      "skills",
-      "about",
-    ];
-    const updates = Object.keys(req.body);
-    const isValidOperation = updates.every((update) =>
-      allowedUpdates.includes(update)
-    );
-    const skillsLength = req.body.skills ? req.body.skills.length : 0;
-    if (skillsLength > 10) {
-      return res
-        .status(400)
-        .send({ error: "Skills exceeds maximum length of 10" });
-    }
-    if (!isValidOperation) {
-      return res.status(400).send({ error: "Invalid updates!" });
-    }
-    const user = await User.findByIdAndUpdate(userId, req.body, {
-      new: false,
-      runValidators: true,
-    });
-    if (!user) {
-      return res.status(404).send("User not found");
-    } else {
-      res.send(user);
-    }
-  } catch (error) {
-    return res.status(404).send("Error updating user : " + error.message);
-  }
-});
-
-// api to update user details by email
-app.patch("/userByEmail/:userEmail", async (req, res) => {
-  try {
-    const userEmail = req.params?.userEmail;
-    const allowedUpdates = [
-      "firstName",
-      "lastName",
-      "password",
-      "age",
-      "location",
-      "gender",
-      "photoUrl",
-      "skills",
-      "about",
-    ];
-    const updates = Object.keys(req.body);
-    const isValidOperation = updates.every((update) =>
-      allowedUpdates.includes(update)
-    );
-    const skillsLength = req.body.skills ? req.body.skills.length : 0;
-    if (skillsLength > 10) {
-      return res
-        .status(400)
-        .send({ error: "Skills exceeds maximum length of 10" });
-    }
-    if (!isValidOperation) {
-      return res.status(400).send({ error: "Invalid updates!" });
-    }
-    const user = await User.findOneAndUpdate({ email: userEmail }, req.body, {
-      new: true,
-      runValidators: true,
-    });
-    console.log(user);
-    if (!user) {
-      return res.status(404).send("User not found");
-    } else {
-      res.send(user);
-    }
-  } catch (error) {
-    return res
-      .status(404)
-      .send("Error updating user by email : " + error.message);
-  }
-});
-
-// login api 
+// login api
 app.post("/login", async (req, res) => {
   try {
     // code for validate login data
@@ -190,12 +59,13 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res.status(404).send("User not found");
     }
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    const isPasswordMatch = user.validatePassword(password);
     if (!isPasswordMatch) {
       return res.status(400).send("Invalid credentials");
     }
     //create jwt token and send to client
-    const token = jwt.sign({ userId: user._id }, 'secretKey');
+    const token = user.setJWT();
+    // res.cookie("token", token, {expires: new Date(Date.now() + 60000)});
     res.cookie("token", token);
     res.send("User logged in successfully");
   } catch (error) {
@@ -203,19 +73,24 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile",async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-      const token = req.cookies?.token;
-      const decoded = jwt.verify(token, 'secretKey');
-      const user = await User.findById(decoded.userId);
-      if (!user) {
-          return res.status(404).send("User not found");
-      }
-      res.send(user);
+    const user = req.user;
+    res.send(user);
   } catch (error) {
     return res.status(500).send("Error fetching profile : " + error.message);
   }
+});
 
+app.post("/sendConnectionRequest", userAuth, async (req, res) => {
+  try {
+    console.log("Send Connection Request endpoint accessed");
+    res.send("Connection request sent successfully");
+  } catch (error) {
+    return res
+      .status(500)
+      .send("Error sending connection request : " + error.message);
+  }
 });
 
 // Connect to the database

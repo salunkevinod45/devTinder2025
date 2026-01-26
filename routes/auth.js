@@ -58,7 +58,7 @@ router.post("/login", async (req, res) => {
     const token = user.setJWT();
     // res.cookie("token", token, {expires: new Date(Date.now() + 60000)});
     res.cookie("token", token);
-    res.send("User logged in successfully");
+    res.json({data:user})
   } catch (error) {
     return res.status(500).send("Error logging in user : " + error.message);
   }
@@ -67,7 +67,7 @@ router.post("/login", async (req, res) => {
 router.post("/logout", async (req, res) => {
   try {
     res.clearCookie("token");
-    res.send("User logged out successfully");
+    res.send("logout successfully")
   } catch (error) {
     return res.status(500).send("Error logging out user : " + error.message);
   }

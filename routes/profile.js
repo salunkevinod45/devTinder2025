@@ -7,7 +7,7 @@ const { validateProfileUpdateData } = require("../utils/validation");
 router.get("/profile/view", userAuth, async (req, res) => {
   try {
     const user = req.user;
-    res.send(user);
+    res.json({data:user})
   } catch (error) {
     return res.status(500).send("Error fetching profile : " + error.message);
   }

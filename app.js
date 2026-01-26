@@ -10,17 +10,28 @@ const { validateSignupData, validateLoginData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 
+const allowedOrigins = [
+  "http://localhost:5173"
+];
+
+app.use(cors({
+  origin:allowedOrigins,
+  credentials:true
+}))
 app.use(express.json());
 app.use(cookieParser());
 
 const { authRoutes } = require("./routes/auth");
 const { profileRoutes } = require("./routes/profile");
 const { requestRoutes } = require("./routes/request");
+const { userRouter } = require("./routes/user");
 
 app.use("/", authRoutes);
 app.use("/", profileRoutes);
 app.use("/", requestRoutes);
+app.use("/", userRouter);
 
 
 

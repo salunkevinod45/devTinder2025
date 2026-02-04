@@ -60,11 +60,11 @@ const userSchema = new Schema({
     photoUrl: {
         type: String,
         default: 'https://picsum.photos/id/1/200/300',
-        validate: (value) => {
-            if (!validator.isURL(value)) {
-                throw new Error("Invalid URL for photoUrl");
-            }
-        }
+        // validate: (value) => {
+        //     if (!validator.isURL(value)) {
+        //         throw new Error("Invalid URL for photoUrl");
+        //     }
+        // }
     }
 },{timestamps: true});
 

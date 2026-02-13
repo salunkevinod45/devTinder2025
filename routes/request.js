@@ -13,7 +13,6 @@ router.post(
   userAuth,
   async (req, res) => {
     try {
-      console.log("Send Connection Request endpoint accessed");
       const allowedStatuses = ["interested", "ignored"];
       const status = req.params.status;
       const toUserId = req.params.toUserId;
@@ -69,18 +68,18 @@ router.post(
       });
 
       await connectionRequest.save();
-      if(status ==="interested"){
-        let fromEmailId= loggedInUser.email;
-        let toEmailId = toUser.email;
-        let emailBody = `${loggedInUser.firstName} ${loggedInUser.lastName} ${
-          status === "interested" ? "is" : ""
-        } ${status} ${status === "interested" ? "in" : ""} ${
-          toUser.firstName
-        } ${toUser.lastName}`;
+      // if(status ==="interested"){
+      //   let fromEmailId= loggedInUser.email;
+      //   let toEmailId = toUser.email;
+      //   let emailBody = `${loggedInUser.firstName} ${loggedInUser.lastName} ${
+      //     status === "interested" ? "is" : ""
+      //   } ${status} ${status === "interested" ? "in" : ""} ${
+      //     toUser.firstName
+      //   } ${toUser.lastName}`;
 
-        const emailRes = await sendEmail(fromEmailId,toEmailId,"Connection Request",emailBody);
-        console.log(emailRes);
-      }
+      //   const emailRes = await sendEmail(fromEmailId,toEmailId,"Connection Request",emailBody);
+      //   console.log(emailRes);
+      // }
       res.send(
         `${loggedInUser.firstName} ${loggedInUser.lastName} ${
           status === "interested" ? "is" : ""

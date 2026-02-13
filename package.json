@@ -4,6 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
+    "start:prod": "dotenvx run -f .env.production -- node app.js",
+    "start:local": "dotenvx run -f .env.local -- nodemon app.js",
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@aws-sdk/client-ses": "^3.985.0",
+    "@dotenvx/dotenvx": "^1.52.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

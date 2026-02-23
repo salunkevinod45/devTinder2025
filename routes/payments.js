@@ -52,6 +52,8 @@ paymentRouter.post("/create-order", userAuth, async (req, res) => {
 
 paymentRouter.post("/webhook", async (req, res) => {
   try {
+
+    console.log("Received webhook with body:", req.body);
     // const webhookSignature = req.headers['x-razorpay-signature'];
     const webhookSignature = req.get('x-razorpay-signature');
     const webhookBody = req.body;
@@ -69,6 +71,7 @@ paymentRouter.post("/webhook", async (req, res) => {
     console.log("webhook is valid: ", isValidWebHook);
     const event = webhookBody.event;
     const payload = webhookBody.payload;
+    res.status(200).send("OK");
     // if (event === "payment.captured") {
     //   const paymentEntity = payload.payment.entity;
     //   const razorpayOrderId = paymentEntity.order_id;

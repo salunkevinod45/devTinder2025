@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
+require("./utils/cronjob");
 
 const allowedOrigins = [
   "http://localhost:5173"
@@ -23,11 +24,14 @@ const { authRoutes } = require("./routes/auth");
 const { profileRoutes } = require("./routes/profile");
 const { requestRoutes } = require("./routes/request");
 const { userRouter } = require("./routes/user");
+const paymentRouter = require("./routes/payments");
+require("./utils/dateOperations");
 
 app.use("/", authRoutes);
 app.use("/", profileRoutes);
 app.use("/", requestRoutes);
 app.use("/", userRouter);
+app.use("/payments", paymentRouter);
 
 
 

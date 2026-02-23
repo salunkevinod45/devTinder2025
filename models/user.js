@@ -65,6 +65,13 @@ const userSchema = new Schema({
         //         throw new Error("Invalid URL for photoUrl");
         //     }
         // }
+    },
+    isPremium: {
+        type: Boolean,
+        default: false
+    },
+    membershipType: {
+        type: String,
     }
 },{timestamps: true});
 

@@ -53,9 +53,19 @@ const validateForgotPasswordData = (req) => {
     return true;
 }
 
+const validateOrderInputData = (req) => {
+  const mandatoryFields = ["amount", "currency", "receipt","memberShipType"];
+  const missingFields = mandatoryFields.filter(field => !req.body[field]);
+
+  if (missingFields.length > 0) {
+    throw new Error(`Missing required fields: ${missingFields.join(", ")}`);
+  }
+}
+
 module.exports = {
   validateSignupData,
   validateLoginData,
   validateProfileUpdateData,
-  validateForgotPasswordData
+  validateForgotPasswordData,
+  validateOrderInputData
 };

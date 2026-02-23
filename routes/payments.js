@@ -64,6 +64,8 @@ paymentRouter.post("/webhook", async (req, res) => {
       return res.status(400).send("Invalid webhook signature");
     }
 
+    console.log("Received valid webhook:", webhookBody);
+    console.log("webhook is valid: ", isValidWebHook);
     const event = webhookBody.event;
     const payload = webhookBody.payload;
     // if (event === "payment.captured") {

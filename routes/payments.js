@@ -106,6 +106,7 @@ paymentRouter.post(
       }
       paymentRecord.razorpayPaymentId = razorpayPaymentId;
       paymentRecord.razorpaySignature = razorpaySignature;
+      paymentRecord.status = razorPayment.status;
       const userId = paymentRecord.userId;
       const user = await User.findById(userId);
       if (!user) {

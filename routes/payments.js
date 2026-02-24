@@ -3,6 +3,7 @@ const { userAuth } = require("../middlewares/auth");
 const paymentRouter = express.Router();
 const razorpayInstance = require("../utils/razorpay");
 const Payment = require("../models/payments");
+const User = require("../models/user");
 const { validateOrderInputData } = require("../utils/validation");
 const {
   validateWebhookSignature,
@@ -104,6 +105,16 @@ paymentRouter.post(
       }
       paymentRecord.razorpayPaymentId = razorpayPaymentId;
       paymentRecord.razorpaySignature = razorpaySignature;
+      const userId = paymentRecord.userId;
+      const user = await User.findById(userId);
+      if (!user) {
+        console.error("User not found for ID:", userId);
+        return res.status(404).send("User not found");
+      }
+      user.isPremium = true;
+      user.membershipType = paymentRecord.memberShipType;
+      await user.save();
+
       await paymentRecord.save();
       res.status(200).send("OK");
     } catch (error) {

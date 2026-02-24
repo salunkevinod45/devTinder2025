@@ -60,12 +60,9 @@ paymentRouter.post("/create-order", userAuth, async (req, res) => {
 
 paymentRouter.post(
   "/webhook",
-  express.raw({ type: "application/json" }),
   async (req, res) => {
     try {
-      console.log("Received webhook with body:", req.body);
-      // const webhookSignature = req.headers['x-razorpay-signature'];
-      const webhookSignature = req.get("x-razorpay-signature");
+      const webhookSignature = req.headers["x-razorpay-signature"];
       const webhookBody = req.body;
       const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET_KEY;
       /* NODE SDK: https://github.com/razorpay/razorpay-node */
@@ -80,8 +77,6 @@ paymentRouter.post(
         return res.status(400).send("Invalid webhook signature");
       }
 
-      console.log("Received valid webhook:", webhookBody);
-      console.log("webhook is valid: ", isValidWebHook);
       const event = webhookBody.event;
       const payload = webhookBody.payload;
       const paymentEntity = payload.payment.entity;
@@ -96,7 +91,6 @@ paymentRouter.post(
       }
 
       const paymentRecord = await Payment.findOne({ razorpayOrderId });
-      console.log("Found payment record for order ID:", razorpayOrderId, paymentRecord);
       if (!paymentRecord) {
         console.error(
           "Payment record not found for order ID:",
@@ -110,7 +104,6 @@ paymentRouter.post(
       const userId = paymentRecord.userId;
       const user = await User.findById(userId);
       if (!user) {
-        console.error("User not found for ID:", userId);
         return res.status(404).send("User not found");
       }
       user.isPremium = true;
@@ -120,7 +113,6 @@ paymentRouter.post(
       await paymentRecord.save();
       res.status(200).send("OK");
     } catch (error) {
-      console.error("Error processing webhook:", error);
       return res.status(500).send("Error processing webhook: " + error.message);
     }
   },

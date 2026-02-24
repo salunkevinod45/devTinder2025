@@ -96,6 +96,7 @@ paymentRouter.post(
       }
 
       const paymentRecord = await Payment.findOne({ razorpayOrderId });
+      console.log("Found payment record for order ID:", razorpayOrderId, paymentRecord);
       if (!paymentRecord) {
         console.error(
           "Payment record not found for order ID:",

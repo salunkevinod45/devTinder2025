@@ -25,7 +25,6 @@ paymentRouter.post("/create-order", userAuth, async (req, res) => {
       },
     };
     const order = await razorpayInstance.orders.create(options);
-    // console.log(order);
 
     const orderObj = {
       userId: loggedInUser._id,
@@ -39,8 +38,6 @@ paymentRouter.post("/create-order", userAuth, async (req, res) => {
 
     const savedOrder = await Payment.create(orderObj);
 
-    const test = await razorpayInstance.orders.fetch(order.id);
-    console.log("Fetched order from Razorpay:", test);
 
     res.status(200).json({
       message: "Order created successfully",
@@ -86,16 +83,11 @@ paymentRouter.post(
       const razorPayment =
         await razorpayInstance.payments.fetch(razorpayPaymentId);
       if (razorPayment.status !== paymentEntity.status) {
-        console.error("Payment status mismatch for payment ID:", razorpayPaymentId);
         return res.status(400).send("Payment status mismatch");
       }
 
       const paymentRecord = await Payment.findOne({ razorpayOrderId });
       if (!paymentRecord) {
-        console.error(
-          "Payment record not found for order ID:",
-          razorpayOrderId,
-        );
         return res.status(404).send("Payment record not found");
       }
       paymentRecord.razorpayPaymentId = razorpayPaymentId;

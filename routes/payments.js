@@ -118,4 +118,16 @@ paymentRouter.post(
   },
 );
 
+paymentRouter.get("/check-is-premium-user", userAuth, async (req, res) => {
+  try {
+    const loggedInUser = req.user;
+    res.status(200).json({
+      isPremium: loggedInUser.isPremium,
+      membershipType: loggedInUser.membershipType,
+    });
+  } catch (error) {
+    return res.status(500).send("Error checking premium status: " + error.message);
+  }
+});
+
 module.exports = paymentRouter;
